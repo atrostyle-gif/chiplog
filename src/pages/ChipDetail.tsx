@@ -144,6 +144,8 @@ export function ChipDetail() {
   const [cloudImageUrl, setCloudImageUrl] = useState<
     string | null | undefined
   >(undefined);
+  const [previewImageUrl, setPreviewImageUrl] = useState<string | null>(null);
+  const previewUrlRef = useRef<string | null>(null);
   const [conditionKey, setConditionKey] = useState(0);
   const [selectedIso, setSelectedIso] = useState<MaterialISO>("P");
   const [conditionEditOpen, setConditionEditOpen] = useState(false);
@@ -297,6 +299,23 @@ export function ChipDetail() {
     };
   }, [chip]);
 
+  useEffect(() => {
+    return () => {
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = null;
+      }
+    };
+  }, []);
+
+  const clearPreviewUrl = useCallback(() => {
+    if (previewUrlRef.current) {
+      URL.revokeObjectURL(previewUrlRef.current);
+      previewUrlRef.current = null;
+    }
+    setPreviewImageUrl(null);
+  }, []);
+
   const handleImageChange = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
@@ -305,13 +324,23 @@ export function ChipDetail() {
       e.target.value = "";
       setImageSheetOpen(false);
       setImageUploadError(null);
+
+      if (previewUrlRef.current) {
+        URL.revokeObjectURL(previewUrlRef.current);
+        previewUrlRef.current = null;
+      }
+      const fileToUpload = await convertIfHeic(file);
+      const previewUrl = URL.createObjectURL(fileToUpload);
+      previewUrlRef.current = previewUrl;
+      setPreviewImageUrl(previewUrl);
+
       setImageUploading(true);
       try {
-        const fileToUpload = await convertIfHeic(file);
         const result = await uploadChipImage(chip.id, fileToUpload);
         if (!result.success) {
           logSyncError("Image upload failed", result.error);
           setImageUploadError(IMAGE_UPLOAD_FAILED);
+          clearPreviewUrl();
           return;
         }
         setCloudImageUrl(result.imageUrl);
@@ -331,11 +360,16 @@ export function ChipDetail() {
         });
         const updated = await getChipById(chip.id);
         if (updated) setChip(updated);
+        clearPreviewUrl();
+      } catch (err) {
+        logSyncError("Image upload failed", err);
+        setImageUploadError(IMAGE_UPLOAD_FAILED);
+        clearPreviewUrl();
       } finally {
         setImageUploading(false);
       }
     },
-    [chip, imageUploading, imageDeleting]
+    [chip, imageUploading, imageDeleting, clearPreviewUrl]
   );
 
   const handleImageDelete = useCallback(async () => {
@@ -589,12 +623,13 @@ export function ChipDetail() {
 
   const isImageBusy = imageUploading || imageDeleting;
 
-  // cloudImageUrl: undefined=未取得, null=取得済み・画像なし, string=取得済み・画像あり
-  const displayImageUrl = getDisplayImageUrl(
+  // 表示優先順: previewImageUrl > cloudImageUrl > chip.imageUrl > noImage
+  const baseDisplayUrl = getDisplayImageUrl(
     cloudImageUrl,
     chip.imageUrl,
     noImage
   );
+  const displayImageUrl = previewImageUrl ?? baseDisplayUrl;
   const hasCloudImage = typeof cloudImageUrl === "string";
 
   return (
@@ -615,6 +650,11 @@ export function ChipDetail() {
                 e.currentTarget.src = noImage;
               }}
             />
+            {imageUploading && (
+              <span className="chip-detail__image-uploading" aria-live="polite">
+                アップロード中...
+              </span>
+            )}
           </div>
           <div className="chip-detail__image-actions">
             <input

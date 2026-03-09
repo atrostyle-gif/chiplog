@@ -489,6 +489,7 @@ a {
 }
 
 .chip-detail__image-wrap {
+  position: relative;
   width: 240px;
   max-width: 100%;
   margin: 0 auto;
@@ -499,6 +500,19 @@ a {
   width: 100%;
   height: auto;
   object-fit: contain;
+}
+
+.chip-detail__image-uploading {
+  position: absolute;
+  bottom: 0.25rem;
+  left: 0.25rem;
+  right: 0.25rem;
+  padding: 0.2rem 0.4rem;
+  font-size: 0.7rem;
+  color: #fff;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 4px;
+  text-align: center;
 }
 
 .chip-detail__image-status {
