@@ -37,6 +37,7 @@ import {
   IMAGE_DELETE_FAILED,
   logSyncError,
 } from "../lib/syncErrorMessages";
+import { getDisplayImageUrl } from "../lib/imageResolver";
 import noImage from "../assets/no-image.png";
 
 function catalogAssetFullUrl(path: string): string {
@@ -138,7 +139,9 @@ export function ChipDetail() {
   const [imageDeleting, setImageDeleting] = useState(false);
   const [imageUploadError, setImageUploadError] = useState<string | null>(null);
   const [imageDeleteError, setImageDeleteError] = useState<string | null>(null);
-  const [cloudImageUrl, setCloudImageUrl] = useState<string | null>(null);
+  const [cloudImageUrl, setCloudImageUrl] = useState<
+    string | null | undefined
+  >(undefined);
   const [conditionKey, setConditionKey] = useState(0);
   const [selectedIso, setSelectedIso] = useState<MaterialISO>("P");
   const [conditionEditOpen, setConditionEditOpen] = useState(false);
@@ -244,10 +247,11 @@ export function ChipDetail() {
 
   useEffect(() => {
     if (!chip) {
-      setCloudImageUrl(null);
+      setCloudImageUrl(undefined);
       return;
     }
     const chipId = chip.id;
+    setCloudImageUrl(undefined);
     let cancelled = false;
     fetchChipImageUrl(chipId).then((result) => {
       if (cancelled) return;
@@ -577,10 +581,11 @@ export function ChipDetail() {
   const isImageBusy = imageUploading || imageDeleting;
 
   // cloudImageUrl: undefined=未取得, null=取得済み・画像なし, string=取得済み・画像あり
-  const displayImageUrl =
-    cloudImageUrl === undefined
-      ? chip.imageUrl
-      : (cloudImageUrl ?? noImage);
+  const displayImageUrl = getDisplayImageUrl(
+    cloudImageUrl,
+    chip.imageUrl,
+    noImage
+  );
   const hasCloudImage = typeof cloudImageUrl === "string";
 
   return (

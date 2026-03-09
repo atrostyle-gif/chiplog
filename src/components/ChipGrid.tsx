@@ -1,5 +1,6 @@
 import { Link } from "react-router-dom";
 import type { Chip } from "../data/chips";
+import { getDisplayImageUrl } from "../lib/imageResolver";
 import noImage from "../assets/no-image.png";
 
 interface ChipGridProps {
@@ -19,8 +20,11 @@ export function ChipGrid({
       {chips.map((chip) => {
         const coatingShort = gradeCoatingMap?.[chip.gradeId];
         const raw = customImageUrls[chip.id];
-        const displayImageUrl =
-          raw === undefined ? chip.imageUrl : (raw ?? noImage);
+        const displayImageUrl = getDisplayImageUrl(
+          raw,
+          chip.imageUrl,
+          noImage
+        );
         return (
           <Link key={chip.id} to={`/chip/${chip.id}`} className="chip-card">
             <div className="chip-card__image-wrap">
