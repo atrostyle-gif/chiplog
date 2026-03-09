@@ -38,6 +38,8 @@ import {
   logSyncError,
 } from "../lib/syncErrorMessages";
 import { getDisplayImageUrl } from "../lib/imageResolver";
+import { getRecommendedConditionDisplay } from "../lib/recommendedConditionDisplay";
+import { convertIfHeic } from "../lib/heicConverter";
 import noImage from "../assets/no-image.png";
 
 function catalogAssetFullUrl(path: string): string {
@@ -198,6 +200,12 @@ export function ChipDetail() {
     [chip, selectedIso, conditionKey]
   );
 
+  const recommendedDisplay = useMemo(
+    () =>
+      getRecommendedConditionDisplay(condition?.shop, catalogRec),
+    [condition?.shop, catalogRec]
+  );
+
   useEffect(() => {
     if (!chip) return;
     setChipMetaState(getChipMeta(chip.id));
@@ -299,7 +307,9 @@ export function ChipDetail() {
       setImageUploadError(null);
       setImageUploading(true);
       try {
-        const result = await uploadChipImage(chip.id, file);
+        const fileToUpload = await convertIfHeic(file);
+        console.log(fileToUpload.type, fileToUpload.size);
+        const result = await uploadChipImage(chip.id, fileToUpload);
         if (!result.success) {
           logSyncError("Image upload failed", result.error);
           setImageUploadError(IMAGE_UPLOAD_FAILED);
@@ -965,6 +975,63 @@ export function ChipDetail() {
           )}
         </section>
       )}
+
+      <section className="chip-detail__section card chip-detail-conditions">
+        <h3 className="chip-detail__section-title">おすすめ条件</h3>
+        {recommendedDisplay.source === "none" ? (
+          <p className="chip-detail-conditions__recommended-empty">
+            条件未登録
+          </p>
+        ) : (
+          <>
+            <p className="chip-detail-conditions__recommended-source">
+              {recommendedDisplay.source === "shop"
+                ? "社内推奨"
+                : "メーカー推奨"}
+            </p>
+            <div className="chip-detail-conditions__rows">
+              <div className="chip-detail-conditions__row">
+                <span className="chip-detail-conditions__row-label">
+                  回転数
+                </span>
+                <span className="chip-detail-conditions__row-value">
+                  {recommendedDisplay.rpmOrVc}
+                </span>
+              </div>
+              <div className="chip-detail-conditions__row">
+                <span className="chip-detail-conditions__row-label">送り</span>
+                <span className="chip-detail-conditions__row-value">
+                  {recommendedDisplay.feed}
+                </span>
+              </div>
+              <div className="chip-detail-conditions__row">
+                <span className="chip-detail-conditions__row-label">
+                  切込み
+                </span>
+                <span className="chip-detail-conditions__row-value">
+                  {recommendedDisplay.doc}
+                </span>
+              </div>
+              <div className="chip-detail-conditions__row">
+                <span className="chip-detail-conditions__row-label">
+                  クーラント
+                </span>
+                <span className="chip-detail-conditions__row-value">
+                  {recommendedDisplay.coolant}
+                </span>
+              </div>
+              <div className="chip-detail-conditions__row">
+                <span className="chip-detail-conditions__row-label">
+                  コメント
+                </span>
+                <span className="chip-detail-conditions__row-value">
+                  {recommendedDisplay.comment}
+                </span>
+              </div>
+            </div>
+          </>
+        )}
+      </section>
 
       <section className="chip-detail__section card chip-detail-conditions">
         <h3 className="chip-detail__section-title">切削条件</h3>

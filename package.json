@@ -16,6 +16,7 @@
     "@netlify/blobs": "^10.7.0",
     "@netlify/functions": "^3.0.0",
     "dexie": "^4.3.0",
+    "heic2any": "^0.0.4",
     "idb": "^8.0.3",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

@@ -909,6 +909,19 @@ a {
   min-width: 4rem;
 }
 
+.chip-detail-conditions__recommended-empty {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.9rem;
+  color: #666;
+}
+
+.chip-detail-conditions__recommended-source {
+  margin: 0 0 0.5rem 0;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #555;
+}
+
 .chip-detail-conditions__rows {
   display: flex;
   flex-direction: column;
