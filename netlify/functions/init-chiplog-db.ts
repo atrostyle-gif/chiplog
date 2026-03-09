@@ -21,9 +21,11 @@ CREATE TABLE IF NOT EXISTS chiplog_logs (
 )
 `.trim();
 
+const DROP_CHIP_IMAGES_TABLE_SQL = "DROP TABLE IF EXISTS chiplog_chip_images";
+
 const CREATE_CHIP_IMAGES_TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS chiplog_chip_images (
-  chip_id INTEGER PRIMARY KEY,
+  chip_id TEXT PRIMARY KEY,
   image_url TEXT NOT NULL,
   updated_at TEXT NOT NULL
 )
@@ -32,6 +34,7 @@ CREATE TABLE IF NOT EXISTS chiplog_chip_images (
 export const handler: Handler = async () => {
   try {
     await turso.execute(CREATE_LOGS_TABLE_SQL);
+    await turso.execute(DROP_CHIP_IMAGES_TABLE_SQL);
     await turso.execute(CREATE_CHIP_IMAGES_TABLE_SQL);
     return {
       statusCode: 200,
