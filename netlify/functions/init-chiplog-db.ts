@@ -23,8 +23,8 @@ CREATE TABLE IF NOT EXISTS chiplog_logs (
 
 const CREATE_CHIP_IMAGES_TABLE_SQL = `
 CREATE TABLE IF NOT EXISTS chiplog_chip_images (
-  chip_id TEXT PRIMARY KEY,
-  image_url TEXT,
+  chip_id INTEGER PRIMARY KEY,
+  image_url TEXT NOT NULL,
   updated_at TEXT NOT NULL
 )
 `.trim();
