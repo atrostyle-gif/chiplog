@@ -73,13 +73,6 @@ export const handler: Handler = async (event) => {
   const siteID = process.env.NETLIFY_SITE_ID;
   const token = process.env.NETLIFY_BLOBS_TOKEN;
 
-  console.log("BLOBS ENV CHECK", {
-    hasSiteID: !!siteID,
-    siteIDPrefix: siteID ? siteID.slice(0, 8) : null,
-    hasToken: !!token,
-    tokenPrefix: token ? token.slice(0, 5) : null,
-  });
-
   if (!siteID) {
     return {
       statusCode: 500,

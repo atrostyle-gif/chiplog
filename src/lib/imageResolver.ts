@@ -4,7 +4,7 @@ export type MakerFolder = "kyocera" | "tungaloy" | "mitsubishi" | "other";
 
 /**
  * 一覧・詳細で共通の画像表示URL解決。
- * 優先順: クラウド保存済みURL > ローカル/シードURL > プレースホルダー。
+ * 優先順: cloudUrl > localUrl > noImageFallback
  * @param cloudUrl undefined=未取得, null=取得済み・画像なし, string=取得済み・画像あり
  * @param localUrl chip.imageUrl（Dexie 由来の解決済みURL）
  * @param noImageFallback 画像がないときのフォールバックURL

@@ -308,7 +308,6 @@ export function ChipDetail() {
       setImageUploading(true);
       try {
         const fileToUpload = await convertIfHeic(file);
-        console.log(fileToUpload.type, fileToUpload.size);
         const result = await uploadChipImage(chip.id, fileToUpload);
         if (!result.success) {
           logSyncError("Image upload failed", result.error);
