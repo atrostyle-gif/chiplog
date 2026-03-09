@@ -70,14 +70,49 @@ export const handler: Handler = async (event) => {
     return badRequest("Image size must be under 5MB");
   }
 
+  const siteID = process.env.NETLIFY_SITE_ID;
+  const token = process.env.NETLIFY_BLOBS_TOKEN;
+
+  console.log("BLOBS ENV CHECK", {
+    hasSiteID: !!siteID,
+    siteIDPrefix: siteID ? siteID.slice(0, 8) : null,
+    hasToken: !!token,
+    tokenPrefix: token ? token.slice(0, 5) : null,
+  });
+
+  if (!siteID) {
+    return {
+      statusCode: 500,
+      headers: jsonHeaders,
+      body: JSON.stringify({
+        success: false,
+        error: "NETLIFY_SITE_ID is missing",
+      }),
+    };
+  }
+
+  if (!token) {
+    return {
+      statusCode: 500,
+      headers: jsonHeaders,
+      body: JSON.stringify({
+        success: false,
+        error: "NETLIFY_BLOBS_TOKEN is missing",
+      }),
+    };
+  }
+
+  const store = getStore({
+    name: STORE_NAME,
+    consistency: "strong",
+    siteID,
+    token,
+  });
+
   const ext = contentType.includes("png") ? "png" : "jpg";
   const key = `chips/${chipId}/${Date.now()}.${ext}`;
 
   try {
-    const store = getStore({
-      name: STORE_NAME,
-      consistency: "strong",
-    });
     const arrayBuffer = new Uint8Array(buffer).buffer as ArrayBuffer;
     await store.set(key, arrayBuffer, {
       metadata: { contentType },
